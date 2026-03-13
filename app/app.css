@@ -1,0 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=Michroma&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: rgb(13, 17, 23);
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background-color: rgb(13, 17, 23);
+    height: 100%;
+    width: 100%;
+    overflow: hidden; 
+    position: fixed;
+}
+
+* {
+    font-family: "Montserrat", sans-serif;
+    font-style: normal;
+}
+
+.player-list-wrapper {
+    height: calc(100vh - 244px);
+    overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none; 
+}
+
+.matches-list {
+    height: calc(100vh - 244px);
+    overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.player-list-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.matches-list::-webkit-scrollbar {
+    display: none;
+}
+
+.overall-player-list {
+    padding: 10px;
+    max-height: calc(100vh - 450px);
+    overflow-y: auto;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;     /* Firefox */
+}
+
+.select-player-list {
+    max-height: 150px;
+    overflow-y: auto;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;     /* Firefox */
+}
+
+.ant-modal-container {
+    background-color: #161B22 !important;
+    padding: 16px !important;
+}
+
+.ant-modal-container .ant-input::placeholder {
+    color: white;
+    opacity: .5;
+    font-family: "Montserrat", sans-serif;
+}
+
+.ant-modal-header {
+    border: none !important;
+}
+
+.create-player-modal .ant-radio-button-wrapper {
+    background-color: #0D1117 !important;
+    border: black;
+    color: white;
+}
+
+.create-player-modal .gender-male .ant-radio-button-wrapper-checked {
+    background-color: #5C7CFA !important;
+    border-color: #5C7CFA !important;
+}
+
+.create-player-modal .ant-radio-button-wrapper-checked {
+    background-color: pink !important;
+    border-color: pink !important;
+}
+
+.ant-modal-close {
+    padding: 0;
+    margin: 0;
+}
+
+.ant-modal-close .anticon {
+    color: white;
+}
+
+.create-player-modal .ant-modal-footer .ant-btn {
+    background-color: #5C7CFA !important;
+    border-color: #5C7CFA !important;
+}
+
+.manage-players-modal .ant-input-prefix {
+    margin-right: 8px;
+}
+
+.record-match-radio-group {
+    margin-top: 10px;
+}
+
+.record-match-radio-group .ant-radio-button-wrapper {
+    background-color: #0D1117;
+    color: white;
+}
+
+.record-match-radio-group .ant-radio-button-wrapper-checked {
+    background-color: #5C7CFA;
+    border-color: #5C7CFA !important;
+    color: white !important;
+    box-shadow: none !important;
+}

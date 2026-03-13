@@ -1,0 +1,37 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  // No URL line here!
+}
+
+model Player {
+  id      Int      @id @default(autoincrement())
+  name    String
+  elo     Int      @default(1000)
+  wins    Int      @default(0)
+  losses  Int      @default(0)
+  matches MatchParticipant[]
+}
+
+model Match {
+  id           Int      @id @default(autoincrement())
+  scoreA       Int
+  scoreB       Int
+  matchDate    DateTime @default(now())
+  matchType    String   // "doubles" or "triples"
+  participants MatchParticipant[]
+}
+
+model MatchParticipant {
+  matchId  Int
+  playerId Int
+  team     String // "A" or "B"
+  match    Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player   Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@id([matchId, playerId])
+}
