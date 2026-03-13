@@ -1,10 +1,18 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next"; // Added Viewport type
 import { Exo_2 } from 'next/font/google';
 
+// 1. Move viewport settings to their own dedicated export
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false, // This replaces user-scalable=0
+};
+
+// 2. Keep other metadata here (remove viewport from this object)
 export const metadata: Metadata = {
   title: "VolleyElo",
   description: "Volleyball Elo Tracker",
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0',
 };
 
 const exo2 = Exo_2({
@@ -19,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={exo2.className}>
-      <body>
+      <body style={{ margin: 0 }}>
         {children}
       </body>
     </html>
