@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Michroma&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
-
 body {
     margin: 0;
     padding: 0;
@@ -14,10 +12,13 @@ html, body {
     width: 100%;
     overflow: hidden; 
     position: fixed;
+    overscroll-behavior: none;
+    touch-action: pan-y;
 }
 
 * {
-    font-family: "Montserrat", sans-serif;
+    font-family: "Exo 2", sans-serif !important;
+    font-optical-sizing: auto;
     font-style: normal;
 }
 
@@ -66,7 +67,7 @@ html, body {
 .ant-modal-container .ant-input::placeholder {
     color: white;
     opacity: .5;
-    font-family: "Montserrat", sans-serif;
+    /* font-family: "Montserrat", sans-serif; */
 }
 
 .ant-modal-header {
@@ -121,4 +122,57 @@ html, body {
     border-color: #5C7CFA !important;
     color: white !important;
     box-shadow: none !important;
+}
+
+.team-selection-area .ant-tag {
+    height: 22px;
+    font-weight: 400 !important;
+}
+
+.add-match-radio-group .ant-radio-button-wrapper {
+    background-color: #0D1117;
+    color: white;
+}
+
+.add-match-radio-group .ant-radio-button-wrapper-checked {
+    background-color: #5C7CFA;
+    border-color: #5C7CFA !important;
+    color: white !important;
+    box-shadow: none !important;
+}
+
+.ant-message-notice-content {
+    background-color: #161b22 !important;
+    color: white !important;
+}
+
+.ant-popover-container {
+    background: black !important;
+}
+
+.ant-popover-container .ant-popconfirm-message-text .ant-popconfirm-title, .ant-popover-container .ant-popconfirm-message-text .ant-popconfirm-description {
+    color: white !important;
+}
+
+.ant-popover-arrow::before {
+    background-color: black !important;
+}
+
+.ant-popconfirm-description {
+    margin: 0 0 8px !important;
+}
+
+.manage-item {
+    padding: 0 !important;
+}
+
+.manage-players-modal .ant-modal-header {
+    margin: 0 !important;
+}
+
+.player-rank-list {
+    height: calc(100vh - 244px);
+    overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none; 
 }

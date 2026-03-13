@@ -3,10 +3,39 @@
 import { prisma } from "../lib/prisma";
 import { revalidatePath } from "next/cache";
 
-export async function deleteMatchAction(id: number) {
-  await prisma.match.delete({
-    where: { id }
+export async function deleteMatchAction(matchId: number) {
+  const match = await prisma.match.findUnique({
+    where: { id: matchId },
+    include: { participants: true },
   });
+
+  if (!match) return;
+
+  const shift = match.eloShift;
+  const teamAWon = match.scoreA > match.scoreB;
+
+  await prisma.$transaction(async (tx) => {
+    for (const participant of match.participants) {
+      const isTeamA = participant.team === 'A';
+      const wasWinner = (isTeamA && teamAWon) || (!isTeamA && !teamAWon);
+
+      // PERFECT REVERSAL
+      // If they were Team A and A won, they gained 'shift'. So we subtract.
+      const eloAdjustment = isTeamA ? (teamAWon ? -shift : shift) : (teamAWon ? shift : -shift);
+
+      await tx.player.update({
+        where: { id: participant.playerId },
+        data: {
+          wins: wasWinner ? { decrement: 1 } : undefined,
+          losses: wasWinner ? undefined : { decrement: 1 },
+          elo: { increment: eloAdjustment }
+        },
+      });
+    }
+
+    await tx.match.delete({ where: { id: matchId } });
+  });
+
   revalidatePath('/');
 }
 
@@ -24,8 +53,21 @@ export async function getAppData() {
     },
     orderBy: { matchDate: 'desc' },
   });
+
+  // Fetch matches from the last 7 days specifically for the delta calculation
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+  const recentMatches = await prisma.match.findMany({
+    where: {
+      matchDate: { gte: oneWeekAgo }
+    },
+    include: {
+      participants: true
+    }
+  });
   
-  return { players, matches };
+  return { players, matches, recentMatches };
 }
 
 // 2. Add New Player
@@ -52,13 +94,13 @@ export async function removePlayer(id: number) {
 }
 
 // 5. Submit Match (Updates match table AND player stats)
-export async function submitMatch(matchData: any, updatedPlayers: any[]) {
-  // Create the match and the participant links
+export async function submitMatch(matchData: any, updatedPlayers: any[], eloShift: number) {
   await prisma.match.create({
     data: {
       scoreA: matchData.scoreA,
       scoreB: matchData.scoreB,
       matchType: matchData.type,
+      eloShift: eloShift, // Now this will be recognized
       participants: {
         create: matchData.participants.map((p: any) => ({
           playerId: p.id,
@@ -68,7 +110,6 @@ export async function submitMatch(matchData: any, updatedPlayers: any[]) {
     }
   });
 
-  // Update every player's ELO and Record
   for (const p of updatedPlayers) {
     await prisma.player.update({
       where: { id: p.id },

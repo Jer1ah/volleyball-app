@@ -18,11 +18,12 @@ model Player {
 }
 
 model Match {
-  id           Int      @id @default(autoincrement())
+  id           Int           @id @default(autoincrement())
+  matchDate    DateTime      @default(now())
   scoreA       Int
   scoreB       Int
-  matchDate    DateTime @default(now())
-  matchType    String   // "doubles" or "triples"
+  matchType    String        // "Doubles" or "Triples"
+  eloShift     Int           // <--- ADD THIS LINE
   participants MatchParticipant[]
 }
 
