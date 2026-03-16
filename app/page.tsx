@@ -15,10 +15,15 @@ const calculateNewRatings = (teamA: any[], teamB: any[], scoreA: number, scoreB:
   if (!teamA.length || !teamB.length) return 0;
   const avgA = teamA.reduce((s, p) => s + (p?.elo || 1000), 0) / teamA.length;
   const avgB = teamB.reduce((s, p) => s + (p?.elo || 1000), 0) / teamB.length;
+  
   const expectedA = 1 / (1 + Math.pow(10, (avgB - avgA) / 400));
   const actualA = scoreA > scoreB ? 1 : 0;
+  
+  // Margin of Victory logic
   const mov = Math.log(Math.abs(scoreA - scoreB) + 1) * (2.2 / ((actualA === 1 ? avgA - avgB : avgB - avgA) * 0.001 + 2.2));
-  return Math.round(K_FACTOR * mov * (actualA - expectedA));
+  
+  // THE FIX: Use Math.abs so this is always a positive "amount of points"
+  return Math.abs(Math.round(K_FACTOR * mov * (actualA - expectedA)));
 };
 
 const getRank = (elo: number) => {
@@ -103,6 +108,8 @@ export default function EloTracker() {
     message.success("Match deleted");
   };
 
+  // Inside handleMatchSubmit in page.tsx
+
   const handleMatchSubmit = async () => {
     if (teamA.length === 0 || teamB.length === 0 || scoreA === undefined || scoreB === undefined) {
         message.error("Invalid match data.");
@@ -110,42 +117,50 @@ export default function EloTracker() {
     }
     setLoading(true);
 
-    // 1. Calculate the shift first
+    // 1. Calculate the shift (this is the absolute amount to move)
     const shift = calculateNewRatings(teamA, teamB, scoreA, scoreB);
 
-    // 2. Map the players with the correct logic
+    // 2. Map the players with the corrected logic
     const updatedPlayersList = players.map((p: any) => {
       const isA = teamA.find((t: any) => t.id === p.id);
       const isB = teamB.find((t: any) => t.id === p.id);
+      
+      // If player wasn't in this match, skip them
       if (!isA && !isB) return null;
 
-      const won = (isA && scoreA > scoreB) || (isB && scoreB > scoreA);
-      
-      // Correctly apply the shift: Team A gets +shift if they win, -shift if they lose
-      const playerEloAdjustment = isA 
-        ? (scoreA > scoreB ? shift : -shift) 
-        : (scoreB > scoreA ? shift : -shift);
+      const teamAWon = scoreA > scoreB;
+      const teamBWon = scoreB > scoreA;
+      const isPlayerWinner = (isA && teamAWon) || (isB && teamBWon);
+
+      // CORRECT LOGIC:
+      // If you won, you get +shift. If you lost, you get -shift.
+      // This applies regardless of which team (A or B) you were on.
+      const playerEloAdjustment = isPlayerWinner ? shift : -shift;
 
       return { 
         id: p.id, 
         elo: p.elo + playerEloAdjustment, 
-        wins: won ? p.wins + 1 : p.wins, 
-        losses: won ? p.losses : p.losses + 1 
+        wins: isPlayerWinner ? p.wins + 1 : p.wins, 
+        losses: isPlayerWinner ? p.losses : p.losses + 1 
       };
     }).filter(Boolean);
 
-    // 3. PASS ALL THREE ARGUMENTS
+    // 3. Submit as usual
     await submitMatch(
       { 
         scoreA, 
         scoreB, 
         type: matchType === 2 ? "Doubles" : "Triples", 
-        participants: [...teamA.map(p => ({ id: p.id, team: 'A' })), ...teamB.map(p => ({ id: p.id, team: 'B' }))] 
+        participants: [
+          ...teamA.map(p => ({ id: p.id, team: 'A' })), 
+          ...teamB.map(p => ({ id: p.id, team: 'B' }))
+        ] 
       }, 
       updatedPlayersList, 
-      shift // <--- THIS WAS MISSING IN YOUR PAGE.TSX
+      shift
     );
 
+    // ... reset state and refresh
     setTeamA([]); setTeamB([]); setScoreA(undefined); setScoreB(undefined);
     setIsMatchModalOpen(false);
     refreshData();
