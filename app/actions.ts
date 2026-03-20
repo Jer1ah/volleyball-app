@@ -17,11 +17,11 @@ export async function deleteMatchAction(matchId: number) {
   await prisma.$transaction(async (tx) => {
     for (const participant of match.participants) {
       const isTeamA = participant.team === 'A';
+      // Fix: base reversal on whether they WON, not which team they were on
       const wasWinner = (isTeamA && teamAWon) || (!isTeamA && !teamAWon);
 
-      // PERFECT REVERSAL
-      // If they were Team A and A won, they gained 'shift'. So we subtract.
-      const eloAdjustment = isTeamA ? (teamAWon ? -shift : shift) : (teamAWon ? shift : -shift);
+      // Winners gained +shift, so subtract. Losers lost -shift, so add back.
+      const eloAdjustment = wasWinner ? -shift : shift;
 
       await tx.player.update({
         where: { id: participant.playerId },
@@ -95,31 +95,34 @@ export async function removePlayer(id: number) {
 
 // 5. Submit Match (Updates match table AND player stats)
 export async function submitMatch(matchData: any, updatedPlayers: any[], eloShift: number) {
-  await prisma.match.create({
-    data: {
-      scoreA: matchData.scoreA,
-      scoreB: matchData.scoreB,
-      matchType: matchData.type,
-      eloShift: eloShift, // Now this will be recognized
-      participants: {
-        create: matchData.participants.map((p: any) => ({
-          playerId: p.id,
-          team: p.team
-        }))
+  // Wrap everything in a single transaction so partial failures can't corrupt data
+  await prisma.$transaction(async (tx) => {
+    await tx.match.create({
+      data: {
+        scoreA: matchData.scoreA,
+        scoreB: matchData.scoreB,
+        matchType: matchData.type,
+        eloShift: eloShift,
+        participants: {
+          create: matchData.participants.map((p: any) => ({
+            playerId: p.id,
+            team: p.team
+          }))
+        }
       }
+    });
+
+    for (const p of updatedPlayers) {
+      await tx.player.update({
+        where: { id: p.id },
+        data: {
+          elo: p.elo,
+          wins: p.wins,
+          losses: p.losses
+        }
+      });
     }
   });
 
-  for (const p of updatedPlayers) {
-    await prisma.player.update({
-      where: { id: p.id },
-      data: {
-        elo: p.elo,
-        wins: p.wins,
-        losses: p.losses
-      }
-    });
-  }
-  
   revalidatePath('/');
 }

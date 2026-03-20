@@ -125,7 +125,9 @@ html, body {
 }
 
 .team-selection-area .ant-tag {
-    height: 22px;
+    min-height: 22px;
+    height: auto;
+    line-height: 20px;
     font-weight: 400 !important;
 }
 

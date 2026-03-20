@@ -10,7 +10,7 @@ import volleyballIcon from "./assets/volleyball.png";
 import './app.css';
 
 // ─── ELO LOGIC ────────────────────────────────────────────────────────────────
-const K_FACTOR = 32;
+const K_FACTOR = 64;
 const calculateNewRatings = (teamA: any[], teamB: any[], scoreA: number, scoreB: number) => {
   if (!teamA.length || !teamB.length) return 0;
   const avgA = teamA.reduce((s, p) => s + (p?.elo || 1000), 0) / teamA.length;
