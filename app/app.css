@@ -178,3 +178,12 @@ html, body {
     -ms-overflow-style: none;
     scrollbar-width: none; 
 }
+
+.player-grid::-webkit-scrollbar {
+    display: none;
+}
+
+.player-grid {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
