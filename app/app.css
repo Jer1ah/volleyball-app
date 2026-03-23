@@ -187,3 +187,27 @@ html, body {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
 }
+
+.generate-matches-container {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+.generate-matches-container::-webkit-scrollbar {
+    display: none;
+}
+
+.reset-players-button {
+    /* color: #5C7CFA !important; */
+    background-color: transparent !important;
+    font-size: 11px;
+    padding: 0 !important;
+    gap: 5px;
+    color: rgb(139, 148, 158) !important;
+    font-weight: 600;
+    height: auto !important;
+
+    .anticon {
+        font-size: 10px;
+    }
+}
